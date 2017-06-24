@@ -1,2 +1,3 @@
-from extractor import extract_augmented_mfccs
+from extractor import extract_mfccs
 
+extract_mfccs()
