@@ -1,4 +1,4 @@
 __pycache__/
 data/
 MFCCs.iml
-.idea/
+.idea/*
