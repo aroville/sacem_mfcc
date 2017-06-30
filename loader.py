@@ -1,36 +1,30 @@
+import constants as C
 from pymongo import MongoClient
 from pickle import loads
-from multiprocessing import Pool, Value
+from multiprocessing import Pool, Value, Manager
 
-DB = 'db_sacem_dev'
-COL = 'yt_training_set_mfcc'
-LBL = 'label'
-FT = 'features'
-PROJ_FT = dict(projection={FT: 1, '_id': 0})
-PROJ_LBL = dict(projection={LBL: 1, '_id': 0})
+PROJ = dict(projection={C.LBL: 1, C.FT: 1, '_id': 0})
 counter = Value('i', 0)
 total = 0
+all_data = Manager().list()
 
 
-def __debinarize(ft_bin):
+def __debinarize(row):
     global counter
     with counter.get_lock():
-        counter.value += 100
-    print('processed {:.2f}%'.format(counter.value/total), end='\r')
-    return loads(ft_bin['features'])
+        counter.value += 1
+    print('processed {:.2f}%'.format(100*counter.value/total), end='\r')
+    label = row[C.LBL]
+
+    for ft in loads(row[C.FT]):
+        all_data.append((ft, label))
 
 
 def get_data():
     with MongoClient() as c:
-        y = [d[LBL] for d in c[DB][COL].find(**PROJ_LBL)]
         global total
-        total = len(y)
+        total = c[C.DB][C.COL].count()
         with Pool() as p:
-            x = p.map(__debinarize, c[DB][COL].find(**PROJ_FT))
-        print()
-
-    #
-    # with Pool() as p:
-    #     x = p.map(__debinarize, x_bin[:10])
-    print(len(x))
-    print(len(y))
+            p.map(__debinarize, c[C.DB][C.COL].find(**PROJ))
+            print()
+    return list(zip(*all_data))
