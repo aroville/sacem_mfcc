@@ -23,8 +23,9 @@ def __filter_processed_ids(files):
 
 def extract_features_from_yt_audioset():
     q = {c.YT_ID: {'$in': __filter_processed_ids(listdir(c.PATH_YT_AUDIO))}}
-    args = _db[c.COL_AUDIOSET].find(q, {c.YT_ID: 1, c.LBL: 1})
+    args = _db[c.COL_AUDIOSET].find(q, {c.YT_ID: 1, c.LBL: 1}).limit(c.LIMIT)
     Pool().starmap(__extract_one, zip(args, repeat(c.PATH_YT_AUDIO)))
+    print('\n')
 
 
 def extract_features_from_augmented_audioset():
@@ -32,8 +33,9 @@ def extract_features_from_augmented_audioset():
         for noise_id in listdir(join(c.PATH_NOISES, cat)):
             _noises[cat].append(noise_id.replace('.mp3', ''))
     args = [{c.YT_ID: f, c.LBL: 'music'}
-            for f in __filter_processed_ids(listdir(c.PATH_Q3))]
+            for f in __filter_processed_ids(listdir(c.PATH_Q3))[:c.LIMIT]]
     Pool().starmap(__extract_one, zip(args, repeat(c.PATH_Q3), repeat(True)))
+    print('\n')
 
 
 def __load_audio(audio_path, yt_id, noise_cat=None, noise_id=None):

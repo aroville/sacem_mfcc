@@ -1,30 +1,22 @@
-import constants as C
+import constants as c
+from utils import CustomCounter
 from pymongo import MongoClient
-from pickle import loads
-from multiprocessing import Pool, Value, Manager
+from multiprocessing import Pool, Manager
 
-PROJ = dict(projection={C.LBL: 1, C.FT: 1, '_id': 0})
-counter = Value('i', 0)
-total = 0
+_counter = CustomCounter({'done': MongoClient()[c.DB][c.COL_FT].count()})
 all_data = Manager().list()
 
 
-def __debinarize(row):
-    global counter
-    with counter.get_lock():
-        counter.value += 1
-    print('processed {:.2f}%'.format(100*counter.value/total), end='\r')
-    label = row[C.LBL]
-
-    for ft in loads(row[C.FT]):
-        all_data.append((ft, label))
+def __unwrap(row):
+    all_data.extend([(ft, row[c.LBL]) for ft in row[c.FT]])
+    _counter.update('done')
 
 
 def get_data():
-    with MongoClient() as c:
-        global total
-        total = c[C.DB][C.COL].count()
+    with MongoClient() as cli:
+        col = cli[c.DB][c.COL_FT]
         with Pool() as p:
-            p.map(__debinarize, c[C.DB][C.COL].find(**PROJ))
+            p.map(__unwrap, col.find(projection={c.LBL: 1, c.FT: 1}))
             print()
+        cli.close()
     return list(zip(*all_data))

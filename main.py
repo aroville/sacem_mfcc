@@ -1,4 +1,5 @@
-import extractor, loader
+import extractor
+import loader
 from sklearn.ensemble import RandomForestClassifier
 from os.path import join
 import os
@@ -33,7 +34,6 @@ fix_params = dict(
     n_jobs=-1,
     max_features='log2',
     criterion='entropy',
-    # class_weight={0: 1, 1: 3},
     verbose=1,
     max_depth=38
 )
@@ -86,4 +86,3 @@ if max_rf is None:
 f_name = join(folder, max_params_s)+'__score_%d.pkl' % int(10000*max_score)
 print('dumping to file %s' % f_name)
 joblib.dump(max_rf, f_name)
-

@@ -20,6 +20,6 @@ class CustomCounter:
             if self.max_values[l] == 0:
                 s = '{}: {:8d}'.format(l, c.value)
             else:
-                s = '{}: {:3d}%'.format(l, 100*c.value/self.max_values[l])
+                s = '{}: {:3.2f}%'.format(l, 100*c.value/self.max_values[l])
             individual_labels.append(s)
         print('\t\t'.join(individual_labels), end='\r')

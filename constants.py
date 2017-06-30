@@ -17,6 +17,10 @@ FT = 'features'
 YT_ID = 'youtube_id'
 
 
+# TODO: REMOVE THIS SHIT
+LIMIT = 10
+
+
 # EXTRACTION PARAMETERS
 mode = 'mfcc'
 EXTRACT_ARGS = dict(sr=22050, n_fft=880, hop_length=870)
